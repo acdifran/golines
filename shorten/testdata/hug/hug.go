@@ -1,0 +1,32 @@
+package fixtures
+
+func hugSoleCallArg() {
+	x := client.OrgMembership.Update().
+		Where(orgmembership.And(orgmembership.OrganizationID(builder.EntRef().ID), orgmembership.UserID(*args.UserID))).
+		SetRole(membershiprole.Admin)
+	_ = x
+}
+
+func hugSoleCompositeArg() {
+	printResult(map[string]string{"key1": "a very long value", "key2": "another very long value", "key3": "v"})
+	take(&Options{Name: "a very long name for the options struct", Retries: 3, Timeout: 30, Verbose: true})
+}
+
+func hugStandalone() {
+	panic(fmt.Sprintf(">>>>>>>>>>>>>>>>>>> %s %s %s", "really long argument", "another really long argument", abc))
+}
+
+func hugTooLongAfterHugging() {
+	x := client.UserVoice.Create().
+		ActionCreateAndGenerateFromSentMessagesWithAVeryLongName(eaent.UserVoiceGenerateFromSentMessagesInputWithAVeryLongName{EmailAccountID: emailAccount.ID}).
+		Save(ctx)
+	_ = x
+}
+
+func noHugForMultipleArgs() {
+	logger.ErrorContext(ctx, "a fairly long message about what went wrong here", slog.Any("error", err))
+}
+
+func noHugForEmptyInner() {
+	something.VeryLongMethodNameThatPushesTheLineOverTheLimitAllByItselfAndThenSome(anotherPackage.NewThing())
+}

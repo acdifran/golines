@@ -211,9 +211,7 @@ func (s *Shortener) formatExpr(expr dst.Expr, force, isChain bool) {
 			endsLine := !isChain || e.Decorations().After == dst.NewLine
 
 			if startsLine && endsLine {
-				for i, arg := range e.Args {
-					formatList(arg, i)
-				}
+				wrapArgs(e)
 			}
 
 			e.Decorations().After = dst.NewLine
@@ -221,26 +219,17 @@ func (s *Shortener) formatExpr(expr dst.Expr, force, isChain bool) {
 			s.formatExprs(e.Args, false, true)
 			s.formatExpr(e.Fun, shouldShorten, true)
 		} else {
-			for i, arg := range e.Args {
-				if shortenChildArgs {
-					formatList(arg, i)
-				}
-
-				s.formatExpr(arg, false, isChain)
+			if shortenChildArgs {
+				wrapArgs(e)
 			}
 
+			s.formatExprs(e.Args, false, isChain)
 			s.formatExpr(e.Fun, shouldShorten, isChain)
 		}
 
 	case *dst.CompositeLit:
 		if shouldShorten || annotation.HasRecursive(e) {
-			for i, element := range e.Elts {
-				if i == 0 {
-					element.Decorations().Before = dst.NewLine
-				}
-
-				element.Decorations().After = dst.NewLine
-			}
+			wrapElts(e)
 		}
 
 		s.formatExprs(e.Elts, false, isChain)
@@ -341,6 +330,59 @@ func formatList(node dst.Node, index int) {
 	}
 
 	decorations.After = dst.NewLine
+}
+
+// wrapArgs puts each arg of a call on its own line. A sole arg with contents
+// of its own (a call or composite literal) is hugged instead: it stays on the
+// call's line and its contents are wrapped.
+func wrapArgs(call *dst.CallExpr) {
+	if len(call.Args) == 1 && hug(call.Args[0]) {
+		return
+	}
+
+	for i, arg := range call.Args {
+		formatList(arg, i)
+	}
+}
+
+// hug wraps the contents of expr in place of expr itself. It reports false
+// when expr has no contents to wrap, or when they are already wrapped and the
+// line is still too long, so that the caller wraps expr itself instead.
+func hug(expr dst.Expr) bool {
+	switch e := expr.(type) {
+	case *dst.CallExpr:
+		if len(e.Args) == 0 || e.Args[0].Decorations().Before == dst.NewLine {
+			return false
+		}
+
+		wrapArgs(e)
+
+		return true
+
+	case *dst.CompositeLit:
+		if len(e.Elts) == 0 || e.Elts[0].Decorations().Before == dst.NewLine {
+			return false
+		}
+
+		wrapElts(e)
+
+		return true
+
+	case *dst.UnaryExpr:
+		return hug(e.X)
+	}
+
+	return false
+}
+
+func wrapElts(lit *dst.CompositeLit) {
+	for i, element := range lit.Elts {
+		if i == 0 {
+			element.Decorations().Before = dst.NewLine
+		}
+
+		element.Decorations().After = dst.NewLine
+	}
 }
 
 // chainLength determines the length of the function call chain in an expression.
