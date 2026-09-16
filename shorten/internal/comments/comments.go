@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/golangci/golines/shorten/internal"
-	"github.com/golangci/golines/shorten/internal/annotation"
+	"github.com/acdifran/golines/shorten/internal"
+	"github.com/acdifran/golines/shorten/internal/annotation"
 )
 
 // Shortener is a struct that can be used to shorten long comments.

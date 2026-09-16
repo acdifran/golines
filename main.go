@@ -13,10 +13,10 @@ import (
 	"runtime"
 	"runtime/pprof"
 
+	"github.com/acdifran/golines/internal/diff"
+	"github.com/acdifran/golines/internal/formatter"
+	"github.com/acdifran/golines/shorten"
 	"github.com/alecthomas/kingpin/v2"
-	"github.com/golangci/golines/internal/diff"
-	"github.com/golangci/golines/internal/formatter"
-	"github.com/golangci/golines/shorten"
 )
 
 // these values are provided automatically by Goreleaser.

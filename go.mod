@@ -1,4 +1,4 @@
-module github.com/golangci/golines
+module github.com/acdifran/golines
 
 go 1.25.0
 

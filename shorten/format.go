@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"reflect"
 
+	"github.com/acdifran/golines/shorten/internal/annotation"
+	"github.com/acdifran/golines/shorten/internal/tags"
 	"github.com/dave/dst"
-	"github.com/golangci/golines/shorten/internal/annotation"
-	"github.com/golangci/golines/shorten/internal/tags"
 )
 
 // formatFile formats the provided AST file starting at the top-level declarations.
@@ -199,10 +199,23 @@ func (s *Shortener) formatExpr(expr dst.Expr, force, isChain bool) {
 	case *dst.CallExpr:
 		shortenChildArgs := shouldShorten || annotation.HasRecursive(e)
 
-		_, ok := e.Fun.(*dst.SelectorExpr)
+		sel, ok := e.Fun.(*dst.SelectorExpr)
 
 		if ok && shortenChildArgs &&
 			s.config.ChainSplitDots && (isChain || chainLength(e) > 1) {
+			// The annotation sits right before this call, so it already starts its
+			// own line. If a newline after it is a no-op too, splitting on dots
+			// can't shorten the line; wrap the args instead.
+			startsLine := annotation.Has(sel.Sel) ||
+				(annotation.Has(e) && chainLength(e) == 1)
+			endsLine := !isChain || e.Decorations().After == dst.NewLine
+
+			if startsLine && endsLine {
+				for i, arg := range e.Args {
+					formatList(arg, i)
+				}
+			}
+
 			e.Decorations().After = dst.NewLine
 
 			s.formatExprs(e.Args, false, true)
@@ -251,7 +264,13 @@ func (s *Shortener) formatExpr(expr dst.Expr, force, isChain bool) {
 		s.formatExpr(e.Value, shouldShorten, isChain)
 
 	case *dst.SelectorExpr:
-		s.formatExpr(e.X, shouldShorten, isChain)
+		if _, ok := e.X.(*dst.CallExpr); ok {
+			// A link whose next method name already starts a new line ends its
+			// own line, so it is not mid-chain for shortening purposes.
+			s.formatExpr(e.X, shouldShorten, e.Sel.Decorations().Before != dst.NewLine)
+		} else {
+			s.formatExpr(e.X, shouldShorten, isChain)
+		}
 
 	case *dst.StructType:
 		if s.config.ReformatTags {

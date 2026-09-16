@@ -6,8 +6,8 @@ import (
 	"io"
 	"strings"
 
+	"github.com/acdifran/golines/shorten/internal/annotation"
 	"github.com/dave/dst"
-	"github.com/golangci/golines/shorten/internal/annotation"
 )
 
 // Node is a representation of a node in the AST graph.

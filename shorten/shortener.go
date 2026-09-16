@@ -8,11 +8,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/acdifran/golines/shorten/internal/comments"
+	"github.com/acdifran/golines/shorten/internal/graph"
+	"github.com/acdifran/golines/shorten/internal/tags"
 	"github.com/dave/dst"
 	"github.com/dave/dst/decorator"
-	"github.com/golangci/golines/shorten/internal/comments"
-	"github.com/golangci/golines/shorten/internal/graph"
-	"github.com/golangci/golines/shorten/internal/tags"
 )
 
 // The maximum number of shortening "rounds" that we'll allow.

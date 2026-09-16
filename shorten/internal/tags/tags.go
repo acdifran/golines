@@ -7,8 +7,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/acdifran/golines/shorten/internal/annotation"
 	"github.com/dave/dst"
-	"github.com/golangci/golines/shorten/internal/annotation"
 	"github.com/ldez/structtags/parser"
 )
 

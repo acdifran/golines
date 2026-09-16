@@ -3,9 +3,9 @@ package shorten
 import (
 	"strings"
 
-	"github.com/golangci/golines/shorten/internal"
-	"github.com/golangci/golines/shorten/internal/annotation"
-	"github.com/golangci/golines/shorten/internal/comments"
+	"github.com/acdifran/golines/shorten/internal"
+	"github.com/acdifran/golines/shorten/internal/annotation"
+	"github.com/acdifran/golines/shorten/internal/comments"
 )
 
 // annotateLongLines adds specially formatted comments to all eligible lines that
